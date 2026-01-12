@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Windows XP in Browser</title>
+<style>
+#screen {
+    width: 800px;
+    height: 600px;
+    border: 2px solid #444;
+}
+body {background: #222; color: #fff; font-family: sans-serif;}
+button{margin:10px;}
+</style>
+</head>
+
+<body>
+<h2>Windows XP Browser VM (QEMU WASM)</h2>
+<button onclick="startXP()">Start XP</button>
+<div id="screen"></div>
+
+<script src="qemu/qemu-system-i386.js"></script>
+<script>
+let qemuInstance;
+
+function startXP() {
+    if (qemuInstance) return;
+
+    qemuInstance = Module({
+        arguments: [
+            "-m", "512",                     // memory MB
+            "-cdrom", "images/windowsxp.iso", // XP ISO path
+            "-hda", "images/xp_disk.img",     // XP-installed disk image
+            "-boot", "d",                     // boot from CD
+            "-vga", "std",                    // standard VGA
+            "-display", "gtk"                 // use canvas target
+        ],
+        noInitialRun: false,
+        print: x => console.log(x),
+        canvas: document.getElementById("screen")
+    });
+}
+</script>
+
+</body>
+</html>
