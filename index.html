@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>v86 Multi-OS Browser VM</title>
 <style>
 body {
@@ -12,7 +12,6 @@ body {
     margin: 0;
     padding: 0;
 }
-
 header {
     background: #000080;
     color: white;
@@ -20,7 +19,6 @@ header {
     font-size: 24px;
     font-weight: bold;
 }
-
 button {
     background: #C0C0C0;
     border: 2px solid #808080;
@@ -33,7 +31,6 @@ button {
 button:hover {
     background: #E0E0E0;
 }
-
 #screen {
     width: 800px;
     height: 600px;
@@ -57,7 +54,6 @@ button:hover {
 
 <div id="screen"></div>
 
-<!-- v86 JS -->
 <script src="https://copy.sh/v86/build/libv86.js"></script>
 
 <script>
@@ -74,16 +70,16 @@ const OS_IMAGES = {
     },
     win98: {
         cdrom: "https://copy.sh/v86/images/windows98.iso",
-        memory: 64 * 1024 * 1024
+        memory: 128 * 1024 * 1024  // increased memory
     },
     linux: {
         cdrom: "https://copy.sh/v86/images/linux.iso",
-        memory: 64 * 1024 * 1024
+        memory: 128 * 1024 * 1024  // increased memory
     }
 };
 
 function startVM(os) {
-    if(emulator) return;
+    if (emulator) return;
 
     const config = OS_IMAGES[os];
     emulator = new V86Starter({
@@ -95,16 +91,28 @@ function startVM(os) {
         cdrom: { url: config.cdrom },
         autostart: true
     });
+
+    emulator.add_listener("serial0-output-char", function(char) {
+        console.log("Serial output:", char);
+    });
+
+    emulator.add_listener("emulator-ready", function() {
+        console.log("Emulator ready");
+    });
+
+    emulator.add_listener("emulator-error", function(e) {
+        console.error("Emulator error:", e);
+    });
 }
 
 function resetVM() {
-    if(emulator) {
+    if (emulator) {
         emulator.stop();
         emulator = null;
     }
-    const ctx = document.getElementById("screen").getContext('2d');
-    ctx.fillStyle = "black";
-    ctx.fillRect(0,0,800,600);
+    const container = document.getElementById("screen");
+    container.innerHTML = ""; // Clear canvas and children
+    container.style.background = "black";
 }
 </script>
 
