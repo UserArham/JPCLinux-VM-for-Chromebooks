@@ -80,7 +80,7 @@ const OS_IMAGES = {
 };
 
 function startVM(os) {
-    if (emulator) return;
+    if (emulator) return; // prevent multiple VMs at the same time
 
     const config = OS_IMAGES[os];
 
@@ -94,12 +94,12 @@ function startVM(os) {
         autostart: true
     });
 
-    // Debug serial output
+    // Serial output logs (useful for debugging boot messages)
     emulator.add_listener("serial0-output-char", function(char) {
         console.log(char);
     });
 
-    // Ensure canvas has proper size
+    // Resize canvas properly when emulator is ready
     emulator.add_listener("emulator-ready", function() {
         console.log("Emulator ready");
         const canvas = document.querySelector("#screen canvas");
@@ -109,6 +109,7 @@ function startVM(os) {
         }
     });
 
+    // Catch any emulator errors
     emulator.add_listener("emulator-error", function(e) {
         console.error("Emulator error:", e);
     });
@@ -119,9 +120,13 @@ function resetVM() {
         emulator.stop();
         emulator = null;
     }
-    const container = document.getElementById("screen");
-    container.innerHTML = ""; // remove old canvas
-    container.style.background = "black";
+
+    const canvas = document.querySelector("#screen canvas");
+    if (canvas) {
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 }
 </script>
 
