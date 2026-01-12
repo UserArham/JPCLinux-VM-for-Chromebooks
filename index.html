@@ -54,6 +54,7 @@ button:hover {
 
 <div id="screen"></div>
 
+<!-- v86 JS -->
 <script src="https://copy.sh/v86/build/libv86.js"></script>
 
 <script>
@@ -70,11 +71,11 @@ const OS_IMAGES = {
     },
     win98: {
         cdrom: "https://copy.sh/v86/images/windows98.iso",
-        memory: 128 * 1024 * 1024  // increased memory
+        memory: 128 * 1024 * 1024
     },
     linux: {
         cdrom: "https://copy.sh/v86/images/linux.iso",
-        memory: 128 * 1024 * 1024  // increased memory
+        memory: 128 * 1024 * 1024
     }
 };
 
@@ -82,6 +83,7 @@ function startVM(os) {
     if (emulator) return;
 
     const config = OS_IMAGES[os];
+
     emulator = new V86Starter({
         wasm_path: "https://copy.sh/v86/build/v86.wasm",
         memory_size: config.memory,
@@ -92,12 +94,19 @@ function startVM(os) {
         autostart: true
     });
 
+    // Debug serial output
     emulator.add_listener("serial0-output-char", function(char) {
-        console.log("Serial output:", char);
+        console.log(char);
     });
 
+    // Ensure canvas has proper size
     emulator.add_listener("emulator-ready", function() {
         console.log("Emulator ready");
+        const canvas = document.querySelector("#screen canvas");
+        if (canvas) {
+            canvas.width = 800;
+            canvas.height = 600;
+        }
     });
 
     emulator.add_listener("emulator-error", function(e) {
@@ -111,7 +120,7 @@ function resetVM() {
         emulator = null;
     }
     const container = document.getElementById("screen");
-    container.innerHTML = ""; // Clear canvas and children
+    container.innerHTML = ""; // remove old canvas
     container.style.background = "black";
 }
 </script>
