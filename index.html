@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>v86 Multi-OS Browser VM</title>
+<meta charset="UTF-8">
+<title>v86 Multi-OS Browser VM with Iframes</title>
 <style>
 body {
     background: #008080;
@@ -31,10 +31,15 @@ button {
 button:hover {
     background: #E0E0E0;
 }
-#screen {
+#vm-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+iframe.vm {
     width: 800px;
     height: 600px;
-    margin: 20px auto;
     border: 4px solid #808080;
     box-shadow: 4px 4px #404040;
     background: black;
@@ -43,89 +48,43 @@ button:hover {
 </head>
 <body>
 
-<header>v86 Multi-OS Browser VM</header>
+<header>v86 Multi-OS Browser VM (Iframe)</header>
 
 <p>Select an OS:</p>
-<button onclick="startVM('dos')">DOS</button>
-<button onclick="startVM('freedos')">FreeDOS</button>
-<button onclick="startVM('win98')">Windows 98</button>
-<button onclick="startVM('linux')">Linux</button>
-<button onclick="resetVM()">Reset VM</button>
+<button onclick="loadVM('dos')">DOS</button>
+<button onclick="loadVM('freedos')">FreeDOS</button>
+<button onclick="loadVM('win98')">Windows 98</button>
+<button onclick="loadVM('linux')">Linux</button>
+<button onclick="resetVM()">Reset</button>
 
-<div id="screen"></div>
-
-<!-- v86 JS -->
-<script src="https://copy.sh/v86/build/libv86.js"></script>
+<div id="vm-container"></div>
 
 <script>
-let emulator = null;
-
-const OS_IMAGES = {
-    dos: {
-        cdrom: "https://copy.sh/v86/images/dos.iso",
-        memory: 16 * 1024 * 1024
-    },
-    freedos: {
-        cdrom: "https://copy.sh/v86/images/freedos.iso",
-        memory: 16 * 1024 * 1024
-    },
-    win98: {
-        cdrom: "https://copy.sh/v86/images/windows98.iso",
-        memory: 128 * 1024 * 1024
-    },
-    linux: {
-        cdrom: "https://copy.sh/v86/images/linux.iso",
-        memory: 128 * 1024 * 1024
-    }
+const OS_IFRAMES = {
+    dos: "https://copy.sh/v86/build/v86.html?url=https://copy.sh/v86/images/dos.iso",
+    freedos: "https://copy.sh/v86/build/v86.html?url=https://copy.sh/v86/images/freedos.iso",
+    win98: "https://copy.sh/v86/build/v86.html?url=https://copy.sh/v86/images/windows98.iso",
+    linux: "https://copy.sh/v86/build/v86.html?url=https://copy.sh/v86/images/linux.iso"
 };
 
-function startVM(os) {
-    if (emulator) return; // prevent multiple VMs at the same time
+let currentIframe = null;
 
-    const config = OS_IMAGES[os];
+function loadVM(os) {
+    resetVM();
 
-    emulator = new V86Starter({
-        wasm_path: "https://copy.sh/v86/build/v86.wasm",
-        memory_size: config.memory,
-        screen_container: document.getElementById("screen"),
-        bios: { url: "https://copy.sh/v86/bios/seabios.bin" },
-        vga_bios: { url: "https://copy.sh/v86/bios/vgabios.bin" },
-        cdrom: { url: config.cdrom },
-        autostart: true
-    });
+    const container = document.getElementById("vm-container");
+    const iframe = document.createElement("iframe");
+    iframe.className = "vm";
+    iframe.src = OS_IFRAMES[os];
+    container.appendChild(iframe);
 
-    // Serial output logs (useful for debugging boot messages)
-    emulator.add_listener("serial0-output-char", function(char) {
-        console.log(char);
-    });
-
-    // Resize canvas properly when emulator is ready
-    emulator.add_listener("emulator-ready", function() {
-        console.log("Emulator ready");
-        const canvas = document.querySelector("#screen canvas");
-        if (canvas) {
-            canvas.width = 800;
-            canvas.height = 600;
-        }
-    });
-
-    // Catch any emulator errors
-    emulator.add_listener("emulator-error", function(e) {
-        console.error("Emulator error:", e);
-    });
+    currentIframe = iframe;
 }
 
 function resetVM() {
-    if (emulator) {
-        emulator.stop();
-        emulator = null;
-    }
-
-    const canvas = document.querySelector("#screen canvas");
-    if (canvas) {
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (currentIframe) {
+        currentIframe.remove();
+        currentIframe = null;
     }
 }
 </script>
