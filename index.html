@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>v86 All ~83 OS Selector</title>
+<title>v86 Multi-OS Browser VM</title>
 <style>
 body {
     background: #008080;
-    font-family: Tahoma, sans‑serif;
+    font-family: Tahoma, sans-serif;
     text-align: center;
     color: white;
     margin: 0;
@@ -35,130 +35,120 @@ select, button {
 </head>
 <body>
 
-<header>v86 All ~83 OS Selector</header>
+<header>v86 Multi-OS Browser VM</header>
 
 <select id="os-select" style="width: 80%; max-width: 600px;"></select><br>
 <button onclick="bootSelected()">Boot</button>
-<button onclick="bootNext()">Next</button>
+<button onclick="bootNext()">Next OS</button>
 <button onclick="stopVM()">Stop</button>
 
 <div id="vm"></div>
 
 <script src="libv86.js"></script>
-
 <script>
-// OS list based on copy.sh/v86 catalog :contentReference[oaicite:3]{index=3}
 const OS_LIST = [
-    { name: "Android x86 1.6‑r2", file: "images/android_x86_16.iso" },
-    { name: "Arch Linux", file: "images/arch_linux.iso" },
-    { name: "Buildroot Linux", file: "images/buildroot_linux.iso" },
-    { name: "Damn Small Linux", file: "images/damn_small_linux.iso" },
-    { name: "ELKS", file: "images/elks.img" },
-    { name: "NodeOS", file: "images/nodeos.iso" },
-    { name: "Tilck", file: "images/tilck.iso" },
-    { name: "FreeBSD 12.0", file: "images/freebsd12.iso" },
-    { name: "NetBSD 4.0", file: "images/netbsd40.iso" },
-    { name: "OpenBSD 6.6", file: "images/openbsd66.iso" },
-    { name: "FiwixOS (Doom)", file: "images/fiwixos.iso" },
-    { name: "Minix 3.3", file: "images/minix33.iso" },
-    { name: "Redox OS", file: "images/redox_iso.iso" },
-    { name: "SerenityOS", file: "images/serenity_iso.iso" },
-    { name: "Sortix", file: "images/sortix.iso" },
-    { name: "Soso", file: "images/soso.iso" },
-    { name: "Syllable OS", file: "images/syllable.iso" },
-    { name: "Unix V7", file: "images/unixv7.img" },
-    { name: "BeOS 5", file: "images/beos5.iso" },
-    { name: "Haiku OS", file: "images/haiku.iso" },
-    { name: "AROS Broadway", file: "images/aros_broadway.iso" },
-    { name: "Icaros Desktop", file: "images/icaros_desktop.iso" },
-    { name: "Tiny AROS", file: "images/tiny_aros.iso" },
-    { name: "Windows 1.01", file: "images/windows101.img" },
-    { name: "Windows 2.03", file: "images/windows203.img" },
-    { name: "Windows 3.0", file: "images/windows30.img" },
-    { name: "Windows 3.1", file: "images/windows31.img" },
-    { name: "Windows 95", file: "images/windows95.iso" },
-    { name: "Windows 98", file: "images/windows98.iso" },
-    { name: "Windows ME", file: "images/windowsme.iso" },
-    { name: "Windows NT 3.1", file: "images/windows_nt31.iso" },
-    { name: "Windows NT 3.51", file: "images/windows_nt351.iso" },
-    { name: "Windows NT 4.0", file: "images/windows_nt40.iso" },
-    { name: "Windows 2000", file: "images/windows2000.iso" },
-    { name: "86‑DOS", file: "images/86dos.img" },
-    { name: "Exploring IBM", file: "images/exploring_ibm.img" },
-    { name: "FreeDOS", file: "images/freedos.img" },
-    { name: "FreeGEM", file: "images/freegem.img" },
-    { name: "Xcom", file: "images/xcom.img" },
-    { name: "MS‑DOS 4", file: "images/msdos4.img" },
-    { name: "MS‑DOS 6.22", file: "images/msdos622.img" },
-    { name: "PC‑MOS/386", file: "images/pcmos386.img" },
-    { name: "PsychDOS", file: "images/psychdos.img" },
-    { name: "lEEt/OS", file: "images/leetos.img" },
-    { name: "BleskOS", file: "images/bleskos.img" },
-    { name: "Blue Jay", file: "images/blue_jay.img" },
-    { name: "BoneOS", file: "images/boneos.iso" },
-    { name: "BootChess", file: "images/bootchess.img" },
-    { name: "CatK OS", file: "images/catk.iso" },
-    { name: "Crazierl", file: "images/crazierl.iso" },
-    { name: "Dusk OS", file: "images/duskos.img" },
-    { name: "Floppy Bird", file: "images/floppy_bird.img" },
-    { name: "HelenOS", file: "images/helenos.iso" },
-    { name: "Hello v86", file: "images/hello_v86.img" },
-    { name: "HouseOS", file: "images/house_os.img" },
-    { name: "JX OS", file: "images/jx_os.img" },
-    { name: "KolibriOS", file: "images/kolibrios.iso" },
-    { name: "Little Kernel", file: "images/little_kernel.img" },
-    { name: "M/CP", file: "images/mcp.img" },
-    { name: "MikeOS", file: "images/mikeos.img" },
-    { name: "Mobius", file: "images/mobius.img" },
-    { name: "Mu OS", file: "images/mu_os.img" },
-    { name: "NanoShell", file: "images/nanoshell.img" },
-    { name: "NewOS", file: "images/newos.img" },
-    { name: "Nope OS", file: "images/nope_os.img" },
-    { name: "Oberon", file: "images/oberon.img" },
-    { name: "QNX 4.05", file: "images/qnx405.img" },
-    { name: "SectorLISP", file: "images/sectorlisp.img" },
-    { name: "Skift OS", file: "images/skift_os.iso" },
-    { name: "Snowdrop", file: "images/snowdrop.img" },
-    { name: "Sol OS", file: "images/sol_os.img" },
-    { name: "Still Alive", file: "images/stillalive.img" },
-    { name: "T3XFORTH", file: "images/t3xforth.img" },
-    { name: "TetrOS", file: "images/teros.img" },
-    { name: "bootBASIC", file: "images/bootbasic.img" },
-    { name: "Pillman", file: "images/pillman.img" },
-    { name: "bootLogo", file: "images/bootlogo.img" },
-    { name: "bootRogue", file: "images/bootrogue.img" },
-    { name: "dino Boot", file: "images/dino_boot.img" },
-    { name: "Invaders", file: "images/invaders.img" },
-    { name: "Sanos", file: "images/sanos.iso" },
-    { name: "Dancy OS", file: "images/dancy_os.iso" },
-    { name: "CuriOS", file: "images/curios.iso" },
-    { name: "OS64", file: "images/os64.iso" },
-    { name: "netboot.xyz", file: "images/netboot_xyz.iso" },
-    { name: "SqueakNOS", file: "images/squeaknos.iso" },
-    { name: "Chokanji 4", file: "images/chokanji4.iso" }
+    // --- DOS / Windows
+    { name: "86-DOS", file: "images/86dos.img", memory: 8 },
+    { name: "Exploring IBM", file: "images/exploring_ibm.img", memory: 8 },
+    { name: "MS-DOS 4", file: "images/msdos4.img", memory: 8 },
+    { name: "MS-DOS 6.22", file: "images/msdos622.img", memory: 16 },
+    { name: "PC-MOS/386", file: "images/pcmos386.img", memory: 16 },
+    { name: "FreeDOS", file: "images/freedos.img", memory: 16 },
+    { name: "FreeGEM", file: "images/freegem.img", memory: 16 },
+    { name: "Xcom", file: "images/xcom.img", memory: 16 },
+    { name: "PsychDOS", file: "images/psychdos.img", memory: 16 },
+    { name: "Windows 1.01", file: "images/windows101.img", memory: 8 },
+    { name: "Windows 2.03", file: "images/windows203.img", memory: 8 },
+    { name: "Windows 3.0", file: "images/windows30.img", memory: 16 },
+    { name: "Windows 3.1", file: "images/windows31.img", memory: 16 },
+    { name: "Windows 95", file: "images/windows95.iso", memory: 64 },
+    { name: "Windows 98", file: "images/windows98.iso", memory: 64 },
+    { name: "Windows ME", file: "images/windowsme.iso", memory: 64 },
+    { name: "Windows NT 3.1", file: "images/windowsnt31.iso", memory: 64 },
+    { name: "Windows NT 3.51", file: "images/windowsnt351.iso", memory: 64 },
+    { name: "Windows NT 4.0", file: "images/windowsnt4.iso", memory: 64 },
+    { name: "Windows 2000", file: "images/windows2000.iso", memory: 128 },
+    
+    // --- Linux / Linux-like / BSD / Hurd
+    { name: "ELKS", file: "images/elks.img", memory: 16 },
+    { name: "Buildroot Linux", file: "images/buildroot.iso", memory: 32 },
+    { name: "Damn Small Linux", file: "images/dsl.iso", memory: 32 },
+    { name: "NodeOS", file: "images/nodeos.iso", memory: 32 },
+    { name: "Tilck", file: "images/tilck.iso", memory: 32 },
+    { name: "FreeBSD", file: "images/freebsd.iso", memory: 32 },
+    { name: "NetBSD", file: "images/netbsd.iso", memory: 32 },
+    { name: "OpenBSD", file: "images/openbsd.iso", memory: 32 },
+    { name: "Arch Linux", file: "images/arch.iso", memory: 32 },
+    { name: "Arch Hurd", file: "images/arch_hurd.iso", memory: 32 },
+    { name: "BSD/OS", file: "images/bsd_os.iso", memory: 32 },
+    { name: "Minix", file: "images/minix3.iso", memory: 32 },
+    { name: "Redox", file: "images/redox.iso", memory: 32 },
+    { name: "SerenityOS", file: "images/serenity.iso", memory: 32 },
+    { name: "Sortix", file: "images/sortix.iso", memory: 32 },
+    { name: "Soso", file: "images/soso.iso", memory: 32 },
+    { name: "Syllable", file: "images/syllable.iso", memory: 32 },
+    { name: "Unix V7", file: "images/unixv7.img", memory: 16 },
+    
+    // --- BeOS / AmigaOS / Windows-like
+    { name: "BeOS 5", file: "images/beos5.iso", memory: 32 },
+    { name: "Haiku", file: "images/haiku.iso", memory: 32 },
+    { name: "AROS Broadway", file: "images/aros.iso", memory: 32 },
+    { name: "Icaros Desktop", file: "images/icaros.iso", memory: 32 },
+    { name: "Tiny Aros", file: "images/tiny_aros.iso", memory: 32 },
+    { name: "ReactOS", file: "images/reactos.iso", memory: 32 },
+    
+    // --- Plan 9 / Hobby OS
+    { name: "9front", file: "images/9front.iso", memory: 32 },
+    { name: "9legacy", file: "images/9legacy.iso", memory: 32 },
+    
+    // --- Hobby / Bootsector / Custom (includes dino)
+    { name: "MikeOS", file: "images/mikeos.img", memory: 8 },
+    { name: "BootChess", file: "images/bootchess.img", memory: 8 },
+    { name: "bootBASIC", file: "images/bootbasic.img", memory: 8 },
+    { name: "bootLogo", file: "images/bootlogo.img", memory: 8 },
+    { name: "bootRogue", file: "images/bootrogue.img", memory: 8 },
+    { name: "Floppy Bird", file: "images/floppy_bird.img", memory: 8 },
+    { name: "Dino", file: "images/dino.img", memory: 8 },
+    { name: "Invaders", file: "images/invaders.img", memory: 8 },
+    { name: "ToaruOS", file: "images/toaru.iso", memory: 32 },
+    { name: "NanoShell", file: "images/nanoshell.img", memory: 32 },
+    { name: "House", file: "images/house.img", memory: 32 },
+    { name: "KolibriOS", file: "images/kolibri.img", memory: 32 },
+    { name: "Little Kernel", file: "images/little_kernel.img", memory: 32 },
+    { name: "BoneOS", file: "images/boneos.img", memory: 32 },
+    { name: "CuriOS", file: "images/curios.iso", memory: 32 },
+    { name: "OS64", file: "images/os64.iso", memory: 32 },
+    { name: "Sanos", file: "images/sanos.img", memory: 32 },
+    { name: "Dusk OS", file: "images/duskos.img", memory: 32 },
+    { name: "Pillman", file: "images/pillman.img", memory: 8 },
+    { name: "BleskOS", file: "images/bleskos.img", memory: 8 },
+    { name: "Blue Jay", file: "images/bluejay.img", memory: 8 },
+    { name: "Xcom OS", file: "images/xcom.img", memory: 8 },
+    { name: "PsychDOS", file: "images/psychdos.img", memory: 16 }
 ];
 
 // Populate dropdown
 const select = document.getElementById("os-select");
 OS_LIST.forEach(os => {
-    const opt = document.createElement("option");
-    opt.value = os.file;
-    opt.textContent = os.name;
-    select.appendChild(opt);
+    const option = document.createElement("option");
+    option.value = os.file;
+    option.textContent = os.name;
+    select.appendChild(option);
 });
 
-// v86 instance and navigation
 let emulator = null;
 let index = 0;
 
-function startVM(file) {
+function startVM(os) {
     stopVM();
     emulator = new V86Starter({
         wasm_path: "v86.wasm",
         bios: { url: "bios/seabios.bin" },
         vga_bios: { url: "bios/vgabios.bin" },
-        cdrom: { url: file },
+        cdrom: os.file.endsWith(".iso") ? { url: os.file } : undefined,
+        floppies: os.file.endsWith(".img") ? [{ url: os.file }] : undefined,
         screen_container: document.getElementById("vm"),
+        memory_size: (os.memory || 32) * 1024 * 1024,
         autostart: true
     });
 }
@@ -173,15 +163,15 @@ function stopVM() {
 
 function bootSelected() {
     index = select.selectedIndex;
-    startVM(select.value);
+    startVM(OS_LIST[index]);
 }
 
 function bootNext() {
     index = (index + 1) % OS_LIST.length;
     select.selectedIndex = index;
-    startVM(OS_LIST[index].file);
+    startVM(OS_LIST[index]);
 }
-
 </script>
+
 </body>
 </html>
