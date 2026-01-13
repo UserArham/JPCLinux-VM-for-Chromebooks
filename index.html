@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>v86 Multi-OS Browser VM with Iframes</title>
+<title>v86 All ~83 OS Selector</title>
 <style>
 body {
     background: #008080;
-    font-family: "Tahoma", sans-serif;
+    font-family: Tahoma, sans‑serif;
     text-align: center;
     color: white;
     margin: 0;
@@ -14,80 +14,174 @@ body {
 }
 header {
     background: #000080;
-    color: white;
     padding: 10px;
     font-size: 24px;
     font-weight: bold;
 }
-button {
-    background: #C0C0C0;
-    border: 2px solid #808080;
-    padding: 8px 16px;
-    margin: 10px;
+select, button {
+    margin: 8px;
+    padding: 8px 14px;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 2px 2px #404040;
 }
-button:hover {
-    background: #E0E0E0;
-}
-#vm-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-}
-iframe.vm {
+#vm {
     width: 800px;
     height: 600px;
+    margin: 20px auto;
     border: 4px solid #808080;
-    box-shadow: 4px 4px #404040;
     background: black;
 }
 </style>
 </head>
 <body>
 
-<header>v86 Multi-OS Browser VM (Iframe)</header>
+<header>v86 All ~83 OS Selector</header>
 
-<p>Select an OS:</p>
-<button onclick="loadVM('dos')">DOS</button>
-<button onclick="loadVM('freedos')">FreeDOS</button>
-<button onclick="loadVM('win98')">Windows 98</button>
-<button onclick="loadVM('linux')">Linux</button>
-<button onclick="resetVM()">Reset</button>
+<select id="os-select" style="width: 80%; max-width: 600px;"></select><br>
+<button onclick="bootSelected()">Boot</button>
+<button onclick="bootNext()">Next</button>
+<button onclick="stopVM()">Stop</button>
 
-<div id="vm-container"></div>
+<div id="vm"></div>
+
+<script src="libv86.js"></script>
 
 <script>
-const OS_IFRAMES = {
-    dos: "https://copy.sh/v86/build/v86.html?url=https://copy.sh/v86/images/dos.iso",
-    freedos: "https://copy.sh/v86/build/v86.html?url=https://copy.sh/v86/images/freedos.iso",
-    win98: "https://copy.sh/v86/build/v86.html?url=https://copy.sh/v86/images/windows98.iso",
-    linux: "https://copy.sh/v86/build/v86.html?url=https://copy.sh/v86/images/linux.iso"
-};
+// OS list based on copy.sh/v86 catalog :contentReference[oaicite:3]{index=3}
+const OS_LIST = [
+    { name: "Android x86 1.6‑r2", file: "images/android_x86_16.iso" },
+    { name: "Arch Linux", file: "images/arch_linux.iso" },
+    { name: "Buildroot Linux", file: "images/buildroot_linux.iso" },
+    { name: "Damn Small Linux", file: "images/damn_small_linux.iso" },
+    { name: "ELKS", file: "images/elks.img" },
+    { name: "NodeOS", file: "images/nodeos.iso" },
+    { name: "Tilck", file: "images/tilck.iso" },
+    { name: "FreeBSD 12.0", file: "images/freebsd12.iso" },
+    { name: "NetBSD 4.0", file: "images/netbsd40.iso" },
+    { name: "OpenBSD 6.6", file: "images/openbsd66.iso" },
+    { name: "FiwixOS (Doom)", file: "images/fiwixos.iso" },
+    { name: "Minix 3.3", file: "images/minix33.iso" },
+    { name: "Redox OS", file: "images/redox_iso.iso" },
+    { name: "SerenityOS", file: "images/serenity_iso.iso" },
+    { name: "Sortix", file: "images/sortix.iso" },
+    { name: "Soso", file: "images/soso.iso" },
+    { name: "Syllable OS", file: "images/syllable.iso" },
+    { name: "Unix V7", file: "images/unixv7.img" },
+    { name: "BeOS 5", file: "images/beos5.iso" },
+    { name: "Haiku OS", file: "images/haiku.iso" },
+    { name: "AROS Broadway", file: "images/aros_broadway.iso" },
+    { name: "Icaros Desktop", file: "images/icaros_desktop.iso" },
+    { name: "Tiny AROS", file: "images/tiny_aros.iso" },
+    { name: "Windows 1.01", file: "images/windows101.img" },
+    { name: "Windows 2.03", file: "images/windows203.img" },
+    { name: "Windows 3.0", file: "images/windows30.img" },
+    { name: "Windows 3.1", file: "images/windows31.img" },
+    { name: "Windows 95", file: "images/windows95.iso" },
+    { name: "Windows 98", file: "images/windows98.iso" },
+    { name: "Windows ME", file: "images/windowsme.iso" },
+    { name: "Windows NT 3.1", file: "images/windows_nt31.iso" },
+    { name: "Windows NT 3.51", file: "images/windows_nt351.iso" },
+    { name: "Windows NT 4.0", file: "images/windows_nt40.iso" },
+    { name: "Windows 2000", file: "images/windows2000.iso" },
+    { name: "86‑DOS", file: "images/86dos.img" },
+    { name: "Exploring IBM", file: "images/exploring_ibm.img" },
+    { name: "FreeDOS", file: "images/freedos.img" },
+    { name: "FreeGEM", file: "images/freegem.img" },
+    { name: "Xcom", file: "images/xcom.img" },
+    { name: "MS‑DOS 4", file: "images/msdos4.img" },
+    { name: "MS‑DOS 6.22", file: "images/msdos622.img" },
+    { name: "PC‑MOS/386", file: "images/pcmos386.img" },
+    { name: "PsychDOS", file: "images/psychdos.img" },
+    { name: "lEEt/OS", file: "images/leetos.img" },
+    { name: "BleskOS", file: "images/bleskos.img" },
+    { name: "Blue Jay", file: "images/blue_jay.img" },
+    { name: "BoneOS", file: "images/boneos.iso" },
+    { name: "BootChess", file: "images/bootchess.img" },
+    { name: "CatK OS", file: "images/catk.iso" },
+    { name: "Crazierl", file: "images/crazierl.iso" },
+    { name: "Dusk OS", file: "images/duskos.img" },
+    { name: "Floppy Bird", file: "images/floppy_bird.img" },
+    { name: "HelenOS", file: "images/helenos.iso" },
+    { name: "Hello v86", file: "images/hello_v86.img" },
+    { name: "HouseOS", file: "images/house_os.img" },
+    { name: "JX OS", file: "images/jx_os.img" },
+    { name: "KolibriOS", file: "images/kolibrios.iso" },
+    { name: "Little Kernel", file: "images/little_kernel.img" },
+    { name: "M/CP", file: "images/mcp.img" },
+    { name: "MikeOS", file: "images/mikeos.img" },
+    { name: "Mobius", file: "images/mobius.img" },
+    { name: "Mu OS", file: "images/mu_os.img" },
+    { name: "NanoShell", file: "images/nanoshell.img" },
+    { name: "NewOS", file: "images/newos.img" },
+    { name: "Nope OS", file: "images/nope_os.img" },
+    { name: "Oberon", file: "images/oberon.img" },
+    { name: "QNX 4.05", file: "images/qnx405.img" },
+    { name: "SectorLISP", file: "images/sectorlisp.img" },
+    { name: "Skift OS", file: "images/skift_os.iso" },
+    { name: "Snowdrop", file: "images/snowdrop.img" },
+    { name: "Sol OS", file: "images/sol_os.img" },
+    { name: "Still Alive", file: "images/stillalive.img" },
+    { name: "T3XFORTH", file: "images/t3xforth.img" },
+    { name: "TetrOS", file: "images/teros.img" },
+    { name: "bootBASIC", file: "images/bootbasic.img" },
+    { name: "Pillman", file: "images/pillman.img" },
+    { name: "bootLogo", file: "images/bootlogo.img" },
+    { name: "bootRogue", file: "images/bootrogue.img" },
+    { name: "dino Boot", file: "images/dino_boot.img" },
+    { name: "Invaders", file: "images/invaders.img" },
+    { name: "Sanos", file: "images/sanos.iso" },
+    { name: "Dancy OS", file: "images/dancy_os.iso" },
+    { name: "CuriOS", file: "images/curios.iso" },
+    { name: "OS64", file: "images/os64.iso" },
+    { name: "netboot.xyz", file: "images/netboot_xyz.iso" },
+    { name: "SqueakNOS", file: "images/squeaknos.iso" },
+    { name: "Chokanji 4", file: "images/chokanji4.iso" }
+];
 
-let currentIframe = null;
+// Populate dropdown
+const select = document.getElementById("os-select");
+OS_LIST.forEach(os => {
+    const opt = document.createElement("option");
+    opt.value = os.file;
+    opt.textContent = os.name;
+    select.appendChild(opt);
+});
 
-function loadVM(os) {
-    resetVM();
+// v86 instance and navigation
+let emulator = null;
+let index = 0;
 
-    const container = document.getElementById("vm-container");
-    const iframe = document.createElement("iframe");
-    iframe.className = "vm";
-    iframe.src = OS_IFRAMES[os];
-    container.appendChild(iframe);
-
-    currentIframe = iframe;
+function startVM(file) {
+    stopVM();
+    emulator = new V86Starter({
+        wasm_path: "v86.wasm",
+        bios: { url: "bios/seabios.bin" },
+        vga_bios: { url: "bios/vgabios.bin" },
+        cdrom: { url: file },
+        screen_container: document.getElementById("vm"),
+        autostart: true
+    });
 }
 
-function resetVM() {
-    if (currentIframe) {
-        currentIframe.remove();
-        currentIframe = null;
+function stopVM() {
+    if (emulator) {
+        emulator.stop();
+        emulator = null;
+        document.getElementById("vm").innerHTML = "";
     }
 }
-</script>
 
+function bootSelected() {
+    index = select.selectedIndex;
+    startVM(select.value);
+}
+
+function bootNext() {
+    index = (index + 1) % OS_LIST.length;
+    select.selectedIndex = index;
+    startVM(OS_LIST[index].file);
+}
+
+</script>
 </body>
 </html>
