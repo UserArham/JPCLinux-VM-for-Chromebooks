@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Windows 95 in Browser</title>
+    <!-- 1. Include the v86 emulator library -->
+    <script src="libv86.js"></script>
+</head>
+<body style="background-color: #000; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh;">
+
+    <!-- 2. Container where Windows 95 will be rendered -->
+    <div id="screen_container">
+        <div style="white-space: pre; font: 14px monospace; line-height: 14px"></div>
+        <canvas style="display: none"></canvas>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // 3. Initialize the emulator
+            var emulator = new V86Starter({
+                wasm_path: "v86.wasm",      // Path to the WebAssembly file
+                memory_size: 64 * 1024 * 1024, // 64MB RAM for smooth performance
+                vga_memory_size: 4 * 1024 * 1024,
+                screen_container: document.getElementById("screen_container"),
+                
+                // Paths to required BIOS files
+                bios: { url: "seabios.bin" },
+                vga_bios: { url: "vgabios.bin" },
+                
+                // Your Windows 95 .img file
+                hda: { url: "windows95.img" },
+                
+                autostart: true,
+            });
+        };
+    </script>
+</body>
+</html>
