@@ -32,7 +32,7 @@ Much more than v86 requires. These are used with a **SeaBios** bootup, whenever 
 - Windows 95 displays and DOS.
 - SeaBios helpings for launch of Windows, or FreeBSD.
 > This can launch it up to 2 or 5 seconds.
-# TAble
+# Table
 | OS Name | Family | Size | Status | Reason |
 |-------|-------|------|--------|--------|
 | Android x86 1.6-r2 | Linux | 54+ MB | ❌ | Far above v86 memory limit |
