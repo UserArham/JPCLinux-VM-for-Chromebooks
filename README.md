@@ -6,6 +6,7 @@ Welcome to JPCLinux.
 
 # Overview
 A ready-to-use Linux virtual machine pre-configured for development, experimentation, and general use. Ideal for running Linux software, testing scripts, or learning Linux without affecting your main OS.
+<img width="640" height="480" alt="Win3mmelogo (11)" src="https://github.com/user-attachments/assets/2f9f3e03-80c3-4996-9d20-039773e8b938" />
 
 ---
 
