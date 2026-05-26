@@ -89,8 +89,8 @@ function startVM(os) {
     stopVM();
     emulator = new V86Starter({
         wasm_path: "v86.wasm",
-        bios: { url: "bios/seabios.bin" },
-        vga_bios: { url: "bios/vgabios.bin" },
+        bios: { url: "seabios.bin" },
+        vga_bios: { url: "vgabios.bin" },
         cdrom: os.file.endsWith(".iso") ? { url: os.file } : undefined,
         floppies: os.file.endsWith(".img") ? [{ url: os.file }] : undefined,
         screen_container: document.getElementById("vm"),
