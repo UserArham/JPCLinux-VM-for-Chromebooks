@@ -49,7 +49,7 @@ Much more than v86 requires. These are used with a **SeaBios** bootup, whenever 
 # Table
 | OS Name | Family | Size | Status | Reason |
 |-------|-------|------|--------|--------|
-| Android x86 1.6-r2 | Linux | 54+ MB | ❌ | Far above v86 memory limit |
+| Android x86 1.6-r2 | Linux | 54+ MB | Still struggling | no info |
 | Arch Linux | Linux | ~15 MB | ⚠ | Borderline memory usage |
 | Buildroot Linux | Linux | 4.9 MB | ✅ | Minimal kernel + init |
 | Damn Small Linux | Linux | 50 MB | ❌ | Too large |
